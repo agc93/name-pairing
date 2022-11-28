@@ -1,0 +1,59 @@
+﻿@page "/go/{linkRecipient}/{fragment}"
+@using System.Text.Json
+@inject IEncryptService Crypt
+@inject IBrandProvider Brand
+@* <h3>LinkDetail</h3> *@
+
+@if (Link != null) {
+    <MudCard>
+        <MudCardHeader>
+            <MudText Typo="Typo.h3">@Brand.GreetingPrefix @LinkRecipient!</MudText>
+        </MudCardHeader>
+        <MudCardContent>
+            @if (Recipient != null) {
+                @* <MudAlert Elevation="12" Severity="Severity.Success" Variant="Variant.Filled">You are matched with @Recipient.Name!</MudAlert> *@
+                <MudAlert Elevation="12" Severity="Severity.Success" Variant="Variant.Filled">
+                    <MudText Typo="Typo.h4">You are matched with @Recipient.Name!</MudText>
+                </MudAlert>
+                @if (!string.IsNullOrWhiteSpace(Recipient.Notes)) {
+                    <MudText Typo="Typo.body1">@Recipient.Notes</MudText>
+                }
+            }
+            else {
+                <MudAlert Severity="Severity.Error" Variant="Variant.Filled">Couldn't read link data!</MudAlert>
+                <MudText Typo="Typo.body1">There was a problem reading the link data, so we can't tell you who you drew! Check the link you opened carefully and contact whoever sent you this link if you continue to see this error.</MudText>
+            }
+        </MudCardContent>
+    </MudCard>
+}
+
+@* @Fragment *@
+
+@code {
+    [Parameter]
+    public string? Fragment { get; set; }
+    
+    [Parameter]
+    public string? LinkRecipient { get; set; }
+    
+    private ShareLink? Link { get; set; }
+    private Participant? Recipient { get; set; }
+    
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        await base.SetParametersAsync(parameters);
+        if (!string.IsNullOrWhiteSpace(Fragment)) {
+            var link = ShareLink.ParseLinkFragment(Fragment);
+            if (link != null) {
+                Link = link;
+                var json = await Crypt.Decrypt(link.Text, link.Key);
+                if (!string.IsNullOrWhiteSpace(json)) {
+                    var participant = JsonSerializer.Deserialize<Participant>(json);
+                    Recipient = participant;
+                    
+                }
+                StateHasChanged();
+            }
+        }
+    }
+}

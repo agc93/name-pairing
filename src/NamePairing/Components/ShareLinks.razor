@@ -1,0 +1,66 @@
+﻿@using System.Text.Json
+@inject IEncryptService Crypt
+@inject LinkService Links
+@inject IClipboardService Clipboard
+@implements IHandleEvent
+<MudContainer>
+<MudAlert Class="ma-4" Severity="Severity.Normal">@RecipientLinks.Count links ready to share</MudAlert>
+
+
+@if (RecipientLinks.Any()) {
+    <MudStack>
+        @foreach (var link in RecipientLinks) {
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h5">@link.Key</MudText>
+                    @* <MudButton Href="@link.Value" Target="_blank"></MudButton> *@
+                    <MudTextField ReadOnly="true" Value="link.Value"/>
+                    @* <MudText Typo="Typo.body2">@link.Value</MudText> *@
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton OnClick="@(() => Clipboard.CopyToClipboard(link.Value))">Copy to Clipboard</MudButton>
+                </MudCardActions>
+
+            </MudCard>
+        }
+    </MudStack>
+}
+</MudContainer>
+
+@code {
+
+    [Parameter]
+    public Dictionary<Participant, Participant>? Pairings { get; set; }
+    
+    [Parameter]
+    public EventCallback<Dictionary<string, string>> OnLinksReady { get; set; }
+
+    public Dictionary<string, string> RecipientLinks { get; set; } = new();
+
+    public override async Task SetParametersAsync(ParameterView parameters) {
+        
+        var dict = new Dictionary<string, string>();
+        
+        // var existing = Pairings ?? new Dictionary<Participant, Participant>();
+        // var existingCount = existing.Count;
+        await base.SetParametersAsync(parameters);
+        if (parameters.TryGetValue("Pairings", out Dictionary<Participant, Participant>? pairings))
+            if (pairings != null) {
+                foreach (var pair in pairings) {
+                    var json = JsonSerializer.Serialize(pair.Value);
+                    var result = await Crypt.Encrypt(json);
+                    var link = new ShareLink(result.Key, result.Cipher);
+                    var finalLink = Links.GetLink(pair.Key.Name, link);
+                    dict.Add(pair.Key.Name, finalLink);
+                }
+            }
+        RecipientLinks = dict;
+        
+        StateHasChanged();
+        // await OnLinksReady.InvokeAsync(RecipientLinks);
+    }
+
+    Task IHandleEvent.HandleEventAsync(EventCallbackWorkItem callback, object? arg) => callback.InvokeAsync(arg);
+
+
+}

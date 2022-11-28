@@ -1,0 +1,32 @@
+﻿@page "/"
+@inject IBrandProvider Brand
+<PageTitle>@Brand.AppName</PageTitle>
+
+<MudTabs @ref="_tabPanel" Rounded="true">
+    <MudTabPanel Text="Participants" ID="@("panel_participants")">
+        <NamePairing.Components.NameEntry OnGenerate="OnGenerate" Participants="Participants"  />
+    </MudTabPanel>
+    <MudTabPanel Text="Links" ID="@("panel_links")">
+        <NamePairing.Components.ShareLinks Pairings="Pairings" OnLinksReady="OnLinksReady" /> 
+    </MudTabPanel>
+</MudTabs>
+
+@code {
+
+    MudTabs? _tabPanel;
+
+    private List<Participant> Participants { get; set; } = new();
+    
+    private Dictionary<Participant, Participant>? Pairings { get; set; }
+    
+    private async Task OnGenerate(Dictionary<Participant, Participant> arg) {
+        Pairings = arg;
+        _tabPanel?.ActivatePanel("panel_links");
+        StateHasChanged();
+    }
+
+    private async Task OnLinksReady() {
+        _tabPanel?.ActivatePanel("panel_links");
+    }
+
+}

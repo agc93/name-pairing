@@ -1,0 +1,77 @@
+@inject MatchService Matcher
+@* <MudText Typo="Typo.h5" GutterBottom="true">Add your participants below</MudText> *@
+<MudContainer>
+    <MudGrid Class="d-flex align-content-center ma-4">
+        <MudItem xs="12" sm="10">
+            <MudAlert Severity="Severity.Info">Add your participants below and click Generate Links to get your shareable links!</MudAlert>
+        </MudItem>
+        <MudItem xs="12" sm="2" Class="d-flex align-content-center">
+            <MudButton Color="Color.Success" Variant="Variant.Filled" @onclick="GeneratePairs" Disabled="!ReadyToGenerate">Generate Links</MudButton>
+        </MudItem>
+    </MudGrid>
+
+    <MudPaper Class="pa-4 ma-4">
+        @if (_participants.Any()) {
+            <MudStack>
+                @foreach (var participant in _participants) {
+                    var idx = _participants.IndexOf(participant);
+                    <MudCard>
+                        <MudCardContent>
+                            <MudText>Participant #@idx.ToHuman()</MudText>
+                            <MudGrid>
+                                <MudItem xs="12" sm="4">
+                                    <MudTextField @bind-Value="participant.Name" Label="Name" Variant="Variant.Text"></MudTextField>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="participant.Notes" Label="Notes" Variant="Variant.Text"></MudTextField>
+                                </MudItem>
+                                <MudButton xs="2" Variant="Variant.Text" Color="Color.Warning" @onclick="@((e) => RemoveParticipant(idx))">
+                                    Remove
+                                </MudButton>
+                            </MudGrid>
+                        </MudCardContent>
+                        @* <MudCardActions> *@
+                        @*      *@
+                        @* </MudCardActions> *@
+                    </MudCard>
+                }
+            </MudStack>
+        }
+        <MudButton Class="ma-4" Color="Color.Primary" Variant="Variant.Filled" @onclick="AddParticipant">Add Participant</MudButton>
+
+
+    </MudPaper>
+</MudContainer>
+
+
+@code {
+    
+    [Parameter]
+    public List<Participant> Participants
+    {
+        get => _participants;
+        set => _participants = value;
+    }
+
+    private List<Participant> _participants = new List<Participant>() { new Participant(string.Empty) };
+
+    [Parameter]
+    public EventCallback<Dictionary<Participant, Participant>> OnGenerate { get; set; }
+
+    private void AddParticipant() {
+        _participants.Add(new Participant());
+    }
+
+    private void RemoveParticipant(int index) {
+        _participants.RemoveAt(index);
+    }
+
+    private async Task GeneratePairs() {
+        var results = Matcher.GetPairs(_participants);
+        await OnGenerate.InvokeAsync(results);
+    }
+
+
+    public bool ReadyToGenerate => _participants.Count > 2 && _participants.All(p => !string.IsNullOrWhiteSpace(p.Name));
+
+}

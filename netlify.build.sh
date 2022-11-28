@@ -8,5 +8,10 @@ chmod u+x /tmp/dotnet-install.sh
 /tmp/dotnet-install.sh --channel 7.0
 popd
 
+
+
 ## publish project to known location for subsequent deployment by Netlify
 dotnet publish -c Release -o release ./src/NamePairing/
+
+# add variables to appsettings
+jq -n --arg appName "Secret Santa" '{"Customization":{"AppName":$appName,"AppHeader":$appName}}' > ./release/wwwroot/appsettings.json

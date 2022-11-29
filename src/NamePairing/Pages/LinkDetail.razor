@@ -16,7 +16,13 @@
                     <MudText Typo="Typo.h4">You are matched with @Recipient.Name!</MudText>
                 </MudAlert>
                 @if (!string.IsNullOrWhiteSpace(Recipient.Notes)) {
-                    <MudText Typo="Typo.body1">@Recipient.Notes</MudText>
+                    <MudCard Class="my-4">
+                        <MudCardContent>
+                            <MudText Typo="Typo.h5">Additional notes for your match:</MudText>
+                            <MudText Typo="Typo.body1">@Recipient.Notes</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                    
                 }
             }
             else {

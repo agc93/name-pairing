@@ -47,7 +47,7 @@
         if (parameters.TryGetValue("Pairings", out Dictionary<Participant, Participant>? pairings))
             if (pairings != null) {
                 foreach (var pair in pairings) {
-                    var json = JsonSerializer.Serialize(pair.Value);
+                    var json = pair.Value.Serialize();
                     var result = await Crypt.Encrypt(json);
                     var link = new ShareLink(result.Key, result.Cipher);
                     var finalLink = Links.GetLink(pair.Key.Name, link);

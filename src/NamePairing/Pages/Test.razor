@@ -1,0 +1,35 @@
+﻿@page "/Test"
+@inject IBrandProvider Brand
+@inject IMatchService Matcher
+<PageTitle>@Brand.AppName</PageTitle>
+
+@if ((Pairings ?? new Dictionary<Participant, Participant>()).Any()) {
+    foreach (var pairing in Pairings) {
+        <MudText>@pairing.Key.Name -> @pairing.Value.Name</MudText>
+    }
+}
+
+@* <NamePairing.Components.NameEntry OnGenerate="OnGenerate" Participants="Participants"  /> *@
+<MudButton Class="ma-4" Color="Color.Primary" Variant="Variant.Filled" @onclick="MatchPairs">Match</MudButton>
+
+        <NamePairing.Components.ShareLinks Pairings="Pairings" />
+
+@code {
+
+    private List<Participant> Participants { get; set; } = new() {
+        new Participant("A"),
+        new Participant("B"),
+        new Participant("C"),
+        new Participant("D"),
+        new Participant("E"),
+        new Participant("F")
+    };
+    
+    private Dictionary<Participant, Participant>? Pairings { get; set; }
+
+    private async Task MatchPairs() {
+        var results = Matcher.GetPairs(Participants);
+        Pairings = results;
+        StateHasChanged();
+    }
+}

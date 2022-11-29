@@ -17,7 +17,7 @@ builder.Services.AddSubtleCrypto(o =>
 builder.Services.AddScoped<LinkService>();
 builder.Services.AddTransient<IClipboardService, ClipboardService>();
 builder.Services.AddScoped<IEncryptService, InteropEncryptService>();
-builder.Services.AddScoped<MatchService>();
+builder.Services.AddScoped<IMatchService, DifferenceMatchService>();
 builder.Services.AddScoped<IBrandProvider>(p =>
 {
     var config = p.GetService<IConfiguration>();

@@ -1,4 +1,4 @@
-@inject MatchService Matcher
+@inject IMatchService Matcher
 @* <MudText Typo="Typo.h5" GutterBottom="true">Add your participants below</MudText> *@
 <MudContainer>
     <MudGrid Class="d-flex align-content-center ma-4">
@@ -37,7 +37,9 @@
                 }
             </MudStack>
         }
-        <MudButton Class="ma-4" Color="Color.Primary" Variant="Variant.Filled" @onclick="AddParticipant">Add Participant</MudButton>
+        <MudTooltip Class="align-self-center" Style="align-self: center;" Text="To generate links you need at least 3 unique participants!">
+            <MudButton Class="ma-4" Color="Color.Primary" Variant="Variant.Filled" @onclick="AddParticipant">Add Participant</MudButton>
+        </MudTooltip>
 
 
     </MudPaper>
@@ -45,7 +47,7 @@
 
 
 @code {
-    
+
     [Parameter]
     public List<Participant> Participants
     {

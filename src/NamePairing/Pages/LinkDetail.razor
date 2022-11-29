@@ -54,7 +54,7 @@
                 Link = link;
                 var json = await Crypt.Decrypt(link.Text, link.Key);
                 if (!string.IsNullOrWhiteSpace(json)) {
-                    var participant = Participant.Deserialize(json);
+                    var participant = Participant.Deserialize(json.UrlDecode());
                     Recipient = participant;
                     
                 }

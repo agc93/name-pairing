@@ -25,13 +25,10 @@ public record Participant
     public string Serialize() {
         
         var utfKey = Encoding.UTF8.GetBytes(this.Name);
-        var mem = new MemoryStream();
-        var writer = new BinaryWriter(mem);
-        writer.Write(Magic);
-        writer.Write7BitEncodedInt(utfKey.Length);
-        writer.Write(utfKey);
+        using var writer = new BinaryLinkWriter(Magic);
+        writer.WriteStringBytes(utfKey);
         if (string.IsNullOrWhiteSpace(Notes)) {
-            writer.Write(new byte[] {0x00});
+            writer.WriteNullByte();
         }
         else {
             writer.Write((byte)0xFE);
@@ -39,8 +36,8 @@ public record Participant
             writer.Write(Notes);
         }
         writer.Flush();
-        var bytes = mem.ToArray();
-        var binaryEncoded = Convert.ToBase64String(bytes).TrimEnd(Padding).Replace('+','-').Replace('/','_');
+        var bytes = writer.Stream.ToArray();
+        var binaryEncoded = Convert.ToBase64String(bytes);
         return binaryEncoded;
     }
 
@@ -50,20 +47,8 @@ public record Participant
         }
 
         // var incoming = encodedInput;
-        var incoming = encodedInput
-            .Replace('_', '/').Replace('-', '+');
-        if (!encodedInput.EndsWith("=")) {
-            switch (encodedInput.Length % 4) {
-                case 2:
-                    incoming += "==";
-                    break;
-                case 3:
-                    incoming += "=";
-                    break;
-            }
-        }
-
-        var bytes = Convert.FromBase64String(incoming).ToArray();
+        // var encodedInput = encodedInput.UrlDecode();
+        var bytes = Convert.FromBase64String(encodedInput).ToArray();
         if (!bytes.Take(2).SequenceEqual(Magic)) {
             throw new InvalidOperationException("Invalid magic found when deserializing participant!");
         }
@@ -80,9 +65,4 @@ public record Participant
             Notes = notes
         };
     }
-
-    private static readonly char[] Padding = { '=' };
-        
-
-        
 }

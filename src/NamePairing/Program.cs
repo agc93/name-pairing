@@ -14,7 +14,6 @@ builder.Services.AddSubtleCrypto(o =>
 {
     o.Key = Guid.NewGuid().ToString("N");
 });
-builder.Services.AddScoped<LinkService>();
 builder.Services.AddTransient<IClipboardService, ClipboardService>();
 builder.Services.AddScoped<IEncryptService, InteropEncryptService>();
 builder.Services.AddScoped<IMatchService, DifferenceMatchService>();

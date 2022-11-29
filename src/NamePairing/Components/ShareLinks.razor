@@ -1,7 +1,8 @@
 ﻿@using System.Text.Json
+@using Flurl
 @inject IEncryptService Crypt
-@inject LinkService Links
 @inject IClipboardService Clipboard
+@inject NavigationManager Nav
 @implements IHandleEvent
 <MudContainer>
 <MudAlert Class="ma-4" Severity="Severity.Normal">@RecipientLinks.Count links ready to share</MudAlert>
@@ -47,10 +48,10 @@
         if (parameters.TryGetValue("Pairings", out Dictionary<Participant, Participant>? pairings))
             if (pairings != null) {
                 foreach (var pair in pairings) {
-                    var json = pair.Value.Serialize();
+                    var json = pair.Value.Serialize().UrlEncode();
                     var result = await Crypt.Encrypt(json);
                     var link = new ShareLink(result.Key, result.Cipher);
-                    var finalLink = Links.GetLink(pair.Key.Name, link);
+                    var finalLink = GetLink(pair.Key.Name, link);
                     dict.Add(pair.Key.Name, finalLink);
                 }
             }
@@ -61,6 +62,14 @@
     }
 
     Task IHandleEvent.HandleEventAsync(EventCallbackWorkItem callback, object? arg) => callback.InvokeAsync(arg);
+    
+    public string GetLink(string recipientName, ShareLink link) {
+        var fragment = link.GetLinkFragment();
+        var url = new Url(Nav.BaseUri) {
+            Path = $"/go/{recipientName}/" + fragment
+        };
+        return url.ToString();
+    }
 
 
 }

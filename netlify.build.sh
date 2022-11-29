@@ -14,4 +14,4 @@ popd
 dotnet publish -c Release -o release ./src/NamePairing/
 
 # add variables to appsettings
-jq -n --arg appName "Secret Santa" '{"Customization":{"AppName":$appName,"AppHeader":$appName}}' > ./release/wwwroot/appsettings.json
+jq -n --arg appName "Secret Santa" '{"Customization":{"AppName":$appName,"AppHeader":$appName}}' > ./release/wwwroot/appsettings.Production.json

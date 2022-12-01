@@ -13,7 +13,7 @@
             @if (Recipient != null) {
                 @* <MudAlert Elevation="12" Severity="Severity.Success" Variant="Variant.Filled">You are matched with @Recipient.Name!</MudAlert> *@
                 <MudAlert Elevation="12" Severity="Severity.Success" Variant="Variant.Filled">
-                    <MudText Typo="Typo.h4">You are matched with @Recipient.Name!</MudText>
+                    <MudText Typo="Typo.h4">@Brand.MatchString @Recipient.Name!</MudText>
                 </MudAlert>
                 @if (!string.IsNullOrWhiteSpace(Recipient.Notes)) {
                     <MudCard Class="my-4">

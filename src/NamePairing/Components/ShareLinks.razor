@@ -41,12 +41,12 @@
     public override async Task SetParametersAsync(ParameterView parameters) {
         
         var dict = new Dictionary<string, string>();
-        
+        var prev = Pairings ?? new Dictionary<Participant, Participant>();
         // var existing = Pairings ?? new Dictionary<Participant, Participant>();
         // var existingCount = existing.Count;
         await base.SetParametersAsync(parameters);
         if (parameters.TryGetValue("Pairings", out Dictionary<Participant, Participant>? pairings))
-            if (pairings != null) {
+            if (pairings != null && !pairings.Values.SequenceEqual(prev.Values, Participant.Comparer)) {
                 foreach (var pair in pairings) {
                     var json = pair.Value.Serialize().UrlEncode();
                     var result = await Crypt.Encrypt(json);

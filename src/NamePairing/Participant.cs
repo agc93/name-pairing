@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -23,8 +22,7 @@ public record Participant
     };
         
     public string Serialize() {
-        
-        var utfKey = Encoding.UTF8.GetBytes(this.Name);
+        var utfKey = Encoding.UTF8.GetBytes(Name);
         using var writer = new BinaryLinkWriter(Magic);
         writer.WriteStringBytes(utfKey);
         if (string.IsNullOrWhiteSpace(Notes)) {
@@ -64,5 +62,25 @@ public record Participant
         return new Participant(name) {
             Notes = notes
         };
+    }
+
+    public static IEqualityComparer<Participant> Comparer { get; } = new ParticipantComparer();
+}
+
+public sealed class ParticipantComparer : IEqualityComparer<Participant>
+{
+    public bool Equals(Participant? x, Participant? y) {
+        if (ReferenceEquals(x, y)) return true;
+        if (ReferenceEquals(x, null)) return false;
+        if (ReferenceEquals(y, null)) return false;
+        if (x.GetType() != y.GetType()) return false;
+        return string.Equals(x.Name, y.Name, StringComparison.CurrentCultureIgnoreCase) && string.Equals(x.Notes, y.Notes, StringComparison.CurrentCultureIgnoreCase);
+    }
+
+    public int GetHashCode(Participant obj) {
+        var hashCode = new HashCode();
+        hashCode.Add(obj.Name, StringComparer.CurrentCultureIgnoreCase);
+        hashCode.Add(obj.Notes, StringComparer.CurrentCultureIgnoreCase);
+        return hashCode.ToHashCode();
     }
 }

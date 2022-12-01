@@ -25,14 +25,11 @@
                                 <MudItem xs="12" sm="6">
                                     <MudTextField @bind-Value="participant.Notes" Label="Notes" Variant="Variant.Text"></MudTextField>
                                 </MudItem>
-                                <MudButton xs="2" Variant="Variant.Text" Color="Color.Warning" @onclick="@((e) => RemoveParticipant(idx))">
+                                <MudButton xs="2" Variant="Variant.Text" Color="Color.Warning" @onclick="@(() => RemoveParticipant(idx))">
                                     Remove
                                 </MudButton>
                             </MudGrid>
                         </MudCardContent>
-                        @* <MudCardActions> *@
-                        @*      *@
-                        @* </MudCardActions> *@
                     </MudCard>
                 }
             </MudStack>
@@ -74,6 +71,6 @@
     }
 
 
-    public bool ReadyToGenerate => _participants.Count > 2 && _participants.All(p => !string.IsNullOrWhiteSpace(p.Name));
+    public bool ReadyToGenerate => _participants.Distinct(Participant.Comparer).Count() > 2 && _participants.All(p => !string.IsNullOrWhiteSpace(p.Name));
 
 }

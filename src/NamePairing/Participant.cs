@@ -7,6 +7,7 @@ public record Participant
 {
     public string Name {get;set;} = string.Empty;
     public string? Notes {get;set;} = string.Empty;
+    public List<string> Exclusions { get; set; } = new();
     public Participant()
     {
             

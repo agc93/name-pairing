@@ -6,7 +6,7 @@
     <MudTabPanel Text="Participants" ID="@("panel_participants")">
         <NamePairing.Components.NameEntry OnGenerate="OnGenerate" Participants="Participants"  />
     </MudTabPanel>
-    <MudTabPanel Text="Links" ID="@("panel_links")">
+    <MudTabPanel Disabled="!LinksAvailable" Text="Links" ID="@("panel_links")">
         <NamePairing.Components.ShareLinks Pairings="Pairings" OnLinksReady="OnLinksReady" /> 
     </MudTabPanel>
 </MudTabs>
@@ -21,12 +21,14 @@
     
     private async Task OnGenerate(Dictionary<Participant, Participant> arg) {
         Pairings = arg;
-        _tabPanel?.ActivatePanel("panel_links");
+        _tabPanel?.ActivatePanel("panel_links", true);
         StateHasChanged();
     }
 
     private async Task OnLinksReady() {
-        _tabPanel?.ActivatePanel("panel_links");
+        _tabPanel?.ActivatePanel("panel_links", true);
     }
+
+    private bool LinksAvailable => Pairings != null && Pairings.Any();
 
 }

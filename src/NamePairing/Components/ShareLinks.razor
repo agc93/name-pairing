@@ -42,8 +42,6 @@
         
         var dict = new Dictionary<string, string>();
         var prev = Pairings ?? new Dictionary<Participant, Participant>();
-        // var existing = Pairings ?? new Dictionary<Participant, Participant>();
-        // var existingCount = existing.Count;
         await base.SetParametersAsync(parameters);
         if (parameters.TryGetValue("Pairings", out Dictionary<Participant, Participant>? pairings))
             if (pairings != null && !pairings.Values.SequenceEqual(prev.Values, Participant.Comparer)) {

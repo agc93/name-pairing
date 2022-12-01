@@ -1,0 +1,51 @@
+﻿<MudStack>
+    <MudPaper Class="pa-2">
+        <MudStack Justify="Justify.Center" Spacing="0">
+            <MudText Typo="Typo.body1">Exclusions</MudText>
+            <MudText Typo="Typo.body2">This participant will never draw/match anyone listed below.</MudText>
+        </MudStack>
+    </MudPaper>
+
+    @* ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator *@
+    @if (Exclusions != null && Exclusions.Any()) {
+        <MudPaper Class="pa-2">
+            @foreach (var exclusion in Exclusions) {
+                var idx = Exclusions.IndexOf(exclusion);
+            @* <MudText Class="pa-1 ma-1" Align="Align.Left">@item</MudText> *@
+                @* <MudGrid> *@
+                @*     <MudItem xs="11"> *@
+                @*         <MudTextField @bind-Value="Exclusions[idx]" Label="Name" Variant="Variant.Text"></MudTextField> *@
+                @*     </MudItem> *@
+                @*     <MudItem xs="1"> *@
+                @*         <MudIconButton Icon="@Icons.Material.Filled.Delete" @onclick="@(() => RemoveExclusion(idx))"></MudIconButton> *@
+                @*     </MudItem> *@
+                @* </MudGrid> *@
+                <MudStack Row="true">
+                    <MudTextField @bind-Value="Exclusions[idx]" Label="Name" Variant="Variant.Text"></MudTextField>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" @onclick="@(() => RemoveExclusion(idx))"></MudIconButton>
+                </MudStack>
+            }
+        </MudPaper>
+    }
+
+    <MudPaper Class="pa-2">
+        <MudButton OnClick="@AddExclusion" Color="Color.Primary">Add an exclusion</MudButton>
+    </MudPaper>
+</MudStack>
+
+
+@code {
+
+    [Parameter]
+    public List<string>? Exclusions { get; set; }
+
+    private void AddExclusion() {
+        Exclusions ??= new List<string>();
+        Exclusions.Add(string.Empty);
+    }
+
+    private void RemoveExclusion(int index) {
+        Exclusions?.RemoveAt(index);
+    }
+
+}

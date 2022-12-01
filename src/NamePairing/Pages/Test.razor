@@ -17,8 +17,8 @@
 @code {
 
     private List<Participant> Participants { get; set; } = new() {
-        new Participant("A"),
-        new Participant("B"),
+        new Participant("A") {Exclusions = new List<string> {"F"}},
+        new Participant("B") {Exclusions = new List<string>{"E"}},
         new Participant("C"),
         new Participant("D"),
         new Participant("E"),

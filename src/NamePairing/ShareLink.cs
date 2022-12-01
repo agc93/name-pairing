@@ -36,7 +36,6 @@ public record ShareLink(string Key, string Text)
         var utfKey = Encoding.UTF8.GetBytes(link.Key);
         var cipherBytes = Encoding.UTF8.GetBytes(link.Text);
         using var writer = new BinaryLinkWriter(Magic);
-        writer.Write(Magic);
         writer.Write(utfKey);
         writer.WriteStringBytes(cipherBytes);
         writer.WriteNullByte();
@@ -58,6 +57,7 @@ public record ShareLink(string Key, string Text)
         //     case 2: incoming += "=="; break;
         //     case 3: incoming += "="; break;
         // }
+        var rawBytes = Convert.FromBase64String(encodedLink);
         var bytes = Convert.FromBase64String(encodedLink).Skip(2).ToArray();
         using var reader = new BinaryLinkReader(bytes);
         var guidBytes = reader.ReadBytes(32);

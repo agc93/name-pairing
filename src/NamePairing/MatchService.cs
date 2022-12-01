@@ -5,18 +5,24 @@ namespace NamePairing
 {
     public interface IMatchService
     {
-        Dictionary<Participant, Participant> GetPairs(IEnumerable<Participant> participants);
+        Dictionary<Participant, Participant>? GetPairs(IEnumerable<Participant> participants);
     }
 
     public class DifferenceMatchService : IMatchService
     {
+        private static bool Allowed(Participant current, Participant candidate) {
+            return current.Name != candidate.Name &&
+                   !(current.Exclusions ?? new List<string>()).Contains(candidate.Name,
+                       StringComparer.CurrentCultureIgnoreCase);
+        }
+        
         private static Dictionary<Participant, Participant> BuildPairs(IEnumerable<Participant> participants) {
             var all = participants.ToList().Shuffle();
             var recipients = new List<Participant>(all);
             var targets = new Dictionary<Participant, Participant>();
             var candidateSets = new Dictionary<Participant, List<Participant>>();
             foreach (var participant in all) {
-                var candidates = recipients.Where(r => r.Name != participant.Name).ToList();
+                var candidates = recipients.Where(r => Allowed(participant, r)).ToList();
                 candidateSets.Add(participant, candidates);
             }
 
@@ -28,16 +34,14 @@ namespace NamePairing
             return targets;
         }
 
-        public Dictionary<Participant, Participant> GetPairs(IEnumerable<Participant> participants) {
+        public Dictionary<Participant, Participant>? GetPairs(IEnumerable<Participant> participants) {
             var participantList = participants.ToList();
             var results = Policy
                 .Handle<Exception>()
                 .Retry(participantList.Count).ExecuteAndCapture(() => BuildPairs(participantList));
-            if (results.Outcome == OutcomeType.Successful) {
-                return results.Result;
-            }
+            return results.Outcome == OutcomeType.Successful ? results.Result : null;
 
-            throw results.FinalException;
+            // throw results.FinalException;
         }
     }
 

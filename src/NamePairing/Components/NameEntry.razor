@@ -1,9 +1,13 @@
 @inject IMatchService Matcher
-@* <MudText Typo="Typo.h5" GutterBottom="true">Add your participants below</MudText> *@
 <MudContainer>
     <MudGrid Class="d-flex align-content-center ma-4">
         <MudItem xs="12" sm="10">
-            <MudAlert Severity="Severity.Info">Add your participants below and click Generate Links to get your shareable links!</MudAlert>
+            @if (ErrorMessage == null) {
+                <MudAlert Severity="Severity.Info">Add your participants below and click Generate Links to get your shareable links!</MudAlert>
+            }
+            else {
+                <MudAlert Severity="Severity.Error">@ErrorMessage</MudAlert>
+            }
         </MudItem>
         <MudItem xs="12" sm="2" Class="d-flex align-content-center">
             <MudButton Color="Color.Success" Variant="Variant.Filled" @onclick="GeneratePairs" Disabled="!ReadyToGenerate">Generate Links</MudButton>
@@ -20,19 +24,24 @@
                             <MudText>Participant #@idx.ToHuman()</MudText>
                             <MudGrid>
                                 <MudItem xs="12" sm="4">
-                                    <MudTextField @bind-Value="participant.Name" Label="Name" Variant="Variant.Text"></MudTextField>
+                                    <MudTextField @bind-Value="participant.Name" HelperText="The name of the participant" Label="Name" Variant="Variant.Text"></MudTextField>
                                 </MudItem>
                                 <MudItem xs="12" sm="6">
-                                    <MudTextField @bind-Value="participant.Notes" Label="Notes" Variant="Variant.Text"></MudTextField>
+                                    <MudTextField @bind-Value="participant.Notes" HelperText="Optional short message that will be shown to the person who draws this participant" Label="Notes" Variant="Variant.Text"></MudTextField>
                                 </MudItem>
-                                <MudButton xs="2" Variant="Variant.Text" Color="Color.Warning" @onclick="@((e) => RemoveParticipant(idx))">
-                                    Remove
-                                </MudButton>
+                                <MudItem xs="6" sm="1" Class="align-self-center">
+                                    <MudIconButton Variant="Variant.Filled" Icon="@Icons.Material.Filled.PersonRemove" OnClick="@(() => ExclusionStates[idx] = !(ExclusionStates.GetValueOrDefault(idx, false)))" />
+                                    <MudPopover Open="@ExclusionStates.GetValueOrDefault(idx, false)" AnchorOrigin="Origin.TopLeft" TransformOrigin="Origin.TopRight" >
+                                        <div class="d-flex flex-column pa-1">
+                                            <ExclusionList Exclusions="participant.Exclusions"/>
+                                        </div>
+                                    </MudPopover>
+                                </MudItem>
+                                <MudItem xs="6" sm="1" Class="align-self-center">
+                                    <MudIconButton Variant="Variant.Outlined" Color="Color.Warning" @onclick="@(() => RemoveParticipant(idx))" Icon="@Icons.Material.Filled.Delete" />
+                                </MudItem>
                             </MudGrid>
                         </MudCardContent>
-                        @* <MudCardActions> *@
-                        @*      *@
-                        @* </MudCardActions> *@
                     </MudCard>
                 }
             </MudStack>
@@ -48,6 +57,9 @@
 
 @code {
 
+    public string? ErrorMessage { get; set; }
+    private Dictionary<int, bool> ExclusionStates { get; } = new Dictionary<int, bool>();
+
     [Parameter]
     public List<Participant> Participants
     {
@@ -55,7 +67,7 @@
         set => _participants = value;
     }
 
-    private List<Participant> _participants = new List<Participant>() { new Participant(string.Empty) };
+    private List<Participant> _participants = new() { new Participant(string.Empty) };
 
     [Parameter]
     public EventCallback<Dictionary<Participant, Participant>> OnGenerate { get; set; }
@@ -69,11 +81,24 @@
     }
 
     private async Task GeneratePairs() {
-        var results = Matcher.GetPairs(_participants);
-        await OnGenerate.InvokeAsync(results);
+        ErrorMessage = null;
+        try {
+            var results = Matcher.GetPairs(_participants);
+    // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (results != null) {
+                await OnGenerate.InvokeAsync(results);
+                return;
+            }
+            ErrorMessage = "Could not generate matches for your participants! Check any exclusions and try again.";
+        }
+        catch (Exception e) {
+            Console.WriteLine(e);
+    // throw;
+            ErrorMessage = "There was an error generating matches!";
+        }
     }
 
 
-    public bool ReadyToGenerate => _participants.Count > 2 && _participants.All(p => !string.IsNullOrWhiteSpace(p.Name));
+    public bool ReadyToGenerate => _participants.Distinct(Participant.Comparer).Count() > 2 && _participants.All(p => !string.IsNullOrWhiteSpace(p.Name));
 
 }

@@ -35,6 +35,29 @@ namespace NamePairing
         public static string DecodeFromBase64(this string encoded) {
             return Encoding.UTF8.GetString(Convert.FromBase64String(encoded));
         }
+
+        public static string UrlEncode(this string input) {
+            return input.TrimEnd(Padding).Replace('+', '-').Replace('/', '_');
+        }
+
+        public static string UrlDecode(this string encodedInput) {
+            encodedInput = encodedInput
+                .Replace('_', '/').Replace('-', '+');
+            if (!encodedInput.EndsWith("=")) {
+                switch (encodedInput.Length % 4) {
+                    case 2:
+                        encodedInput += "==";
+                        break;
+                    case 3:
+                        encodedInput += "=";
+                        break;
+                }
+            }
+
+            return encodedInput;
+        }
+        
+        private static readonly char[] Padding = { '=' };
     }
 
     public static class ThreadSafeRandom

@@ -2,6 +2,7 @@
 @using System.Text.Json
 @inject IEncryptService Crypt
 @inject IBrandProvider Brand
+@inject IJSRuntime JsRuntime
 @* <h3>LinkDetail</h3> *@
 
 @if (Link != null) {
@@ -10,13 +11,13 @@
             <MudText Typo="Typo.h3">@Brand.GreetingPrefix @LinkRecipient!</MudText>
         </MudCardHeader>
         <MudCardContent>
-            @if (Recipient != null) {
+            @if (Loaded && Recipient != null) {
                 @* <MudAlert Elevation="12" Severity="Severity.Success" Variant="Variant.Filled">You are matched with @Recipient.Name!</MudAlert> *@
-                <MudAlert Elevation="12" Severity="Severity.Success" Variant="Variant.Filled">
-                    <MudText Typo="Typo.h4">You are matched with @Recipient.Name!</MudText>
+                <MudAlert id="matchName" Elevation="12" Severity="Severity.Success" Variant="Variant.Filled">
+                    <MudText Typo="Typo.h4">@Brand.MatchString @Recipient.Name!</MudText>
                 </MudAlert>
-                @if (!string.IsNullOrWhiteSpace(Recipient.Notes)) {
-                    <MudCard Class="my-4">
+                @if (Loaded && !string.IsNullOrWhiteSpace(Recipient.Notes)) {
+                    <MudCard Class="@(Ready ? "visible my-4" : "invisible my-4")" id="matchNotes">
                         <MudCardContent>
                             <MudText Typo="Typo.h5">Additional notes for your match:</MudText>
                             <MudText Typo="Typo.body1">@Recipient.Notes</MudText>
@@ -25,12 +26,18 @@
                     
                 }
             }
-            else {
+            else if (Loaded && Recipient == null) {
                 <MudAlert Severity="Severity.Error" Variant="Variant.Filled">Couldn't read link data!</MudAlert>
                 <MudText Typo="Typo.body1">There was a problem reading the link data, so we can't tell you who you drew! Check the link you opened carefully and contact whoever sent you this link if you continue to see this error.</MudText>
             }
         </MudCardContent>
     </MudCard>
+}
+else {
+    <MudPaper Class="pa-4 ma-4">
+        <MudAlert Severity="Severity.Warning" Variant="Variant.Filled">Couldn't read link data!</MudAlert>
+        <MudText Typo="Typo.body1">There was a problem reading the link data, so we can't tell you who you drew! Check the link you opened carefully and contact whoever sent you this link if you continue to see this error.</MudText>
+    </MudPaper>
 }
 
 @* @Fragment *@
@@ -44,22 +51,39 @@
     
     private ShareLink? Link { get; set; }
     private Participant? Recipient { get; set; }
+    private bool Loaded { get; set; }
+    private bool Ready { get; set; }
     
     public override async Task SetParametersAsync(ParameterView parameters)
     {
         await base.SetParametersAsync(parameters);
-        if (!string.IsNullOrWhiteSpace(Fragment)) {
-            var link = ShareLink.ParseLinkFragment(Fragment);
-            if (link != null) {
-                Link = link;
-                var json = await Crypt.Decrypt(link.Text, link.Key);
-                if (!string.IsNullOrWhiteSpace(json)) {
-                    var participant = JsonSerializer.Deserialize<Participant>(json);
-                    Recipient = participant;
-                    
+        try {
+            if (!string.IsNullOrWhiteSpace(Fragment)) {
+                var link = ShareLink.ParseLinkFragment(Fragment);
+                if (link != null) {
+                    Link = link;
+                    var json = await Crypt.Decrypt(link.Text, link.Key);
+                    if (!string.IsNullOrWhiteSpace(json)) {
+                        var participant = Participant.Deserialize(json.UrlDecode());
+                        Recipient = participant;
+                    }
+                    Loaded = true;
+                    StateHasChanged();
+                    if (Recipient != null) {
+                        await JsRuntime.InvokeVoidAsync("animateCSS", "#matchName", "jackInTheBox");
+                        await Task.Delay(1000);
+                        Ready = true;
+                        StateHasChanged();
+                        if (!string.IsNullOrWhiteSpace(Recipient.Notes)) {
+                            await JsRuntime.InvokeVoidAsync("animateCSS", "#matchNotes", "fadeInUp");
+                        }
+                    }
                 }
-                StateHasChanged();
             }
+        }
+        catch {
+            Loaded = true;
+            StateHasChanged();
         }
     }
 }

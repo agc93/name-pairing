@@ -11,24 +11,23 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
     steps:
       - name: Checkout recursively
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - uses: actions/setup-dotnet@v3
         with:
-          submodules: recursive  # Fetch Hugo themes
-          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
-      - uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '7.0.100' # SDK Version to use.
+          global-json-file: global.json
       - run: dotnet publish -c Release -o release ./src/NamePairing/
       - name: Upload docs packages
         uses: actions/upload-artifact@v1
         with:
           name: static-build
-          path: release/
+          path: release/wwwroot/
       - name: Deploy to Pages
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main' #temporarily disabling
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: release
+          publish_dir: release/wwwroot

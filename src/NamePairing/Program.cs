@@ -26,5 +26,6 @@ builder.Services.AddScoped<IBrandProvider>(p =>
 
     return new DefaultBrandProvider();
 });
+builder.Services.AddScoped<DownloadService>();
 
 await builder.Build().RunAsync();

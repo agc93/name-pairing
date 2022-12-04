@@ -1,8 +1,10 @@
 ﻿@using System.Text.Json
 @using Flurl
+@using System.Text
 @inject IEncryptService Crypt
 @inject IClipboardService Clipboard
 @inject NavigationManager Nav
+@inject DownloadService Download
 @implements IHandleEvent
 <MudContainer>
 <MudAlert Class="ma-4" Severity="Severity.Normal">@RecipientLinks.Count links ready to share</MudAlert>
@@ -25,6 +27,15 @@
             </MudCard>
         }
     </MudStack>
+    <MudCard Class="ma-4 pa-4">
+        <MudCardContent>
+            <MudText Typo="Typo.h4">Save All</MudText>
+            <MudText Typo="Typo.body1">Save all participants and their links to a single file for safe keeping or to use elsewhere.</MudText>
+        </MudCardContent>
+    <MudCardActions>
+        <MudButton OnClick="@(() => SaveAll())">Save to file...</MudButton>
+    </MudCardActions>
+    </MudCard>
 }
 </MudContainer>
 
@@ -67,6 +78,15 @@
             Path = $"/go/{recipientName}/" + fragment
         };
         return url.ToString();
+    }
+
+    private async Task SaveAll() {
+        if (RecipientLinks.Any()) {
+            var textContent = new StringBuilder();
+            textContent.AppendLine(string.Join(Environment.NewLine, RecipientLinks.Select(kvp => $"{kvp.Key}: {kvp.Value}")));
+            var allLinks = textContent.ToString();
+            await Download.SaveText("participantLinks.txt", allLinks);
+        }
     }
 
 

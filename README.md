@@ -32,3 +32,30 @@ You'll get shown the links for your participants that you can copy-paste directl
 ## Can I run it myself?
 
 **Yes!** It's specifically designed to be self-hostable, and incredibly easy to do so. The final application is purely static so essentially any web host of any kind will do. 
+
+The easiest way to get started is to grab the latest build from the Artifacts section of the [CI builds](https://github.com/agc93/name-pairing/actions/workflows/static.yml). If you want to build it yourself, just clone this repo, make sure you have the right .NET 7 SDK installed then run `dotnet publish -o release -c Release ./src/NamePairing/` and the `release/wwwroot` folder will have a complete ready-to-deploy copy of the site.
+
+### Customization
+
+The advantage of running it yourself is that you can also customize some parts of the application! The published output includes an `appsettings.json` that you can use to customize some of the details on the site. Here's what a full config looks like: 
+
+```json
+{
+  "Customization": {
+    "AppName": "Your app name",
+    "AppHeader": "Any header text",
+    "GreetingPrefix": "Hello",
+    "MatchText": "You have drawn"
+  }
+}
+```
+Here's what each of those does:
+
+- `AppName`: shown as the page title in the browser
+- `AppHeader`: the name shown in the bar at the top of the application
+- `GreetingPrefix`: a prefix shown before a participant's name when they view their link.
+- `MatchText`: The text shown to introduce who a participant has drawn.
+
+You can provide all, none, or anything in between and NamePairing will fall back to default values if they're not provided.
+
+> Remember you can also fork this and make whatever customizations you may want as well, just remember to follow the LICENSE!

@@ -14,6 +14,11 @@
 		<PackageReference Include="MudBlazor" Version="6.0.13" />
 		<PackageReference Include="Polly" Version="7.2.3" />
 	</ItemGroup>
+
+	<ItemGroup Condition=" '$(Configuration)' == 'Release'">
+		<Content Update="wwwroot/*.js" CopyToPublishDirectory="Never" />
+		<Content Update="wwwroot/*.min.js" CopyToPublishDirectory="PreserveNewest" />
+	</ItemGroup>
 	
 	
 </Project>

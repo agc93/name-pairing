@@ -23,7 +23,7 @@ The organizer shares each participant's link privately, they click the link, and
 
 ## How do I use it?
 
-If you just want to set up a quick event and don't want to use your own URL, you can access a public version of this app [here](https://agc93.github.com/name-pairing/). 
+If you just want to set up a quick event and don't want to use your own URL, you can access a public version of this app [here](https://agc93.github.io/name-pairing/). 
 
 > Don't worry, there is no "server" so your data is never stored anywhere outside your browser!
 
@@ -51,7 +51,7 @@ The advantage of running it yourself is that you can also customize some parts o
 ```
 Here's what each of those does:
 
-- `AppName`: shown as the page title in the browser
+- `AppName`: shown as the tab/window title in the browser
 - `AppHeader`: the name shown in the bar at the top of the application
 - `GreetingPrefix`: a prefix shown before a participant's name when they view their link.
 - `MatchText`: The text shown to introduce who a participant has drawn.

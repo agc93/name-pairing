@@ -1,0 +1,34 @@
+﻿name: Deploy Docs Site
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*.*.*'
+    paths:
+      - "docs/**"
+      - ".github/workflows/docs.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout recursively
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive  # Fetch Hugo themes
+          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '7.0.100' # SDK Version to use.
+      - run: dotnet publish -c Release -o release ./src/NamePairing/
+      - name: Upload docs packages
+        uses: actions/upload-artifact@v1
+        with:
+          name: static-build
+          path: release/
+      - name: Deploy to Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main' #temporarily disabling
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: release

@@ -25,9 +25,14 @@ jobs:
         with:
           name: static-build
           path: release/wwwroot/
+      # add .nojekyll file to tell GitHub pages to not treat this as a Jekyll project. (Allow files and folders starting with an underscore)
+      - name: Add .nojekyll file
+        run: touch release/wwwroot/.nojekyll
+      - name: Change base-tag in index.html from / to name-pairing
+        run: sed -i 's/<base href="\/" \/>/<base href="\/name-pairing\/" \/>/g' release/wwwroot/index.html
       - name: Deploy to Pages
         uses: peaceiris/actions-gh-pages@v3
-        if: github.ref == 'refs/heads/main' #temporarily disabling
+        if: github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: release/wwwroot

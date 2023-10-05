@@ -75,7 +75,7 @@
     public string GetLink(string recipientName, ShareLink link) {
         var fragment = link.GetLinkFragment();
         var url = new Url(Nav.BaseUri) {
-            Path = $"/go/{recipientName}/" + fragment
+            Path = $"go/{recipientName}/" + fragment
         };
         return url.ToString();
     }
